@@ -4,6 +4,7 @@ import com.example.pos.dto.*;
 import com.example.pos.entity.RefreshToken;
 import com.example.pos.entity.Role;
 import com.example.pos.entity.User;
+import com.example.pos.event.NotificationEvent;
 import com.example.pos.exception.BadRequestException;
 import com.example.pos.exception.UnauthorizedException;
 import com.example.pos.mapper.UserMapper;
@@ -13,8 +14,13 @@ import com.example.pos.repository.UserRepository;
 import com.example.pos.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.MessageSource;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -37,6 +43,7 @@ public class AuthService {
     private final UserMapper userMapper;
     private final MessageSource messageSource;
     private final AuditService auditService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Value("${jwt.refresh-token-expiration}")
     private long refreshTokenExpiration;
@@ -61,8 +68,25 @@ public class AuthService {
                 .enabled(true)
                 .build();
 
-        userRepository.save(user);
-        auditService.logAction("REGISTER", "USER", user.getId(), "New user registered with email: " + user.getEmail());
+        // Set context for self-registration auditing
+        Authentication auth = new UsernamePasswordAuthenticationToken(user.getEmail(), null, java.util.Collections.emptyList());
+        SecurityContextHolder.getContext().setAuthentication(auth);
+        
+        try {
+            userRepository.save(user);
+        } finally {
+            SecurityContextHolder.clearContext();
+        }
+
+        auditService.logAction(user.getEmail(), "REGISTER", "USER", user.getId(), "New user registered with email: " + user.getEmail());
+        
+        eventPublisher.publishEvent(NotificationEvent.builder()
+                .title("Welcome to POS System")
+                .message("Hello " + user.getName() + ", your account has been created successfully.")
+                .type("INFO")
+                .targetUserId(user.getId())
+                .build());
+
         return buildAuthResponse(user);
     }
 

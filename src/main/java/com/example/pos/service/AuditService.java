@@ -1,10 +1,9 @@
 package com.example.pos.service;
 
-import com.example.pos.entity.AuditLog;
-import com.example.pos.repository.AuditLogRepository;
+import com.example.pos.event.AuditEvent;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.scheduling.annotation.Async;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -17,19 +16,24 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class AuditService {
 
-    private final AuditLogRepository auditLogRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
-    @Async
     public void logAction(String action, String resource, Long resourceId, String details) {
-        String username = "SYSTEM";
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null && auth.isAuthenticated() && !auth.getPrincipal().equals("anonymousUser")) {
-            username = auth.getName();
+        logAction(null, action, resource, resourceId, details);
+    }
+
+    public void logAction(String usernameOverride, String action, String resource, Long resourceId, String details) {
+        String username = usernameOverride;
+        if (username == null) {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null && auth.isAuthenticated() && !auth.getPrincipal().equals("anonymousUser")) {
+                username = auth.getName();
+            }
         }
+        if (username == null) username = "System";
 
         String ip = "unknown";
         String ua = "unknown";
-        
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         if (attributes != null) {
             HttpServletRequest request = attributes.getRequest();
@@ -37,8 +41,7 @@ public class AuditService {
             ua = request.getHeader("User-Agent");
         }
 
-        AuditLog log = AuditLog.builder()
-                .timestamp(LocalDateTime.now())
+        AuditEvent event = AuditEvent.builder()
                 .username(username)
                 .action(action)
                 .resource(resource)
@@ -46,9 +49,10 @@ public class AuditService {
                 .details(details)
                 .ipAddress(ip)
                 .userAgent(ua)
+                .timestamp(LocalDateTime.now())
                 .build();
 
-        auditLogRepository.save(log);
+        eventPublisher.publishEvent(event);
     }
 
     private String getClientIp(HttpServletRequest request) {
