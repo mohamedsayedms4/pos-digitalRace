@@ -1,0 +1,92 @@
+package com.example.pos.service;
+
+import com.example.pos.dto.ProductDto;
+import com.example.pos.dto.ProductRequest;
+import com.example.pos.entity.Product;
+import com.example.pos.exception.ResourceNotFoundException;
+import com.example.pos.entity.Category;
+import com.example.pos.exception.ResourceNotFoundException;
+import com.example.pos.mapper.ProductMapper;
+import com.example.pos.repository.CategoryRepository;
+import com.example.pos.repository.ProductRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.MessageSource;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Locale;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+public class ProductService {
+
+    private final ProductRepository productRepository;
+    private final ProductMapper productMapper;
+    private final CategoryRepository categoryRepository;
+    private final MessageSource messageSource;
+
+    public List<ProductDto> getAllProducts() {
+        return productRepository.findAll().stream()
+                .map(productMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    public ProductDto getProductById(Long id, Locale locale) {
+        Product product = findProductOrThrow(id, locale);
+        return productMapper.toDto(product);
+    }
+
+    @Transactional
+    public ProductDto createProduct(ProductRequest request) {
+        Product product = productMapper.toEntity(request);
+        if (product.getStock() == null) {
+            product.setStock(0);
+        }
+        
+        if (request.getCategoryId() != null) {
+            product.setCategory(findCategoryOrThrow(request.getCategoryId(), null)); // Locale handled inside find
+        }
+        
+        productRepository.save(product);
+        return productMapper.toDto(product);
+    }
+
+    @Transactional
+    public ProductDto updateProduct(Long id, ProductRequest request, Locale locale) {
+        Product product = findProductOrThrow(id, locale);
+        productMapper.updateEntityFromRequest(request, product);
+        
+        if (product.getStock() == null) {
+            product.setStock(0);
+        }
+
+        if (request.getCategoryId() != null) {
+            product.setCategory(findCategoryOrThrow(request.getCategoryId(), locale));
+        } else {
+            product.setCategory(null);
+        }
+        
+        productRepository.save(product);
+        return productMapper.toDto(product);
+    }
+
+    @Transactional
+    public void deleteProduct(Long id, Locale locale) {
+        Product product = findProductOrThrow(id, locale);
+        productRepository.delete(product);
+    }
+
+    private Product findProductOrThrow(Long id, Locale locale) {
+        return productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        messageSource.getMessage("error.not.found", null, locale)));
+    }
+
+    private Category findCategoryOrThrow(Long id, Locale locale) {
+        return categoryRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        messageSource.getMessage("admin.category.not.found", new Object[]{id}, locale)));
+    }
+}

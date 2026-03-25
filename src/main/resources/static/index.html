@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POS System Pro</title>
+    <!-- Modern Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Main Style -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="dark-theme">
+
+    <div id="toast-container"></div>
+
+    <!-- =============== LOGIN / REGISTER VIEW =============== -->
+    <section id="auth-view" class="view active">
+        <div class="auth-container">
+            <div class="auth-glass-panel">
+                <h1 class="brand-title">POS <span>PRO</span></h1>
+                
+                <div class="tab-controls">
+                    <button id="tab-login" class="tab-btn active" onclick="switchAuthTab('login')">Login</button>
+                    <button id="tab-register" class="tab-btn" onclick="switchAuthTab('register')">Register</button>
+                </div>
+
+                <!-- Login Form -->
+                <form id="login-form">
+                    <div class="input-group">
+                        <label>Email Address</label>
+                        <input type="email" id="login-email" required placeholder="admin@pos.com" autocomplete="username">
+                    </div>
+                    <div class="input-group">
+                        <label>Password</label>
+                        <input type="password" id="login-password" required placeholder="••••••••" autocomplete="current-password">
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="btn-login-submit">Sign In</button>
+                </form>
+
+                <!-- Register Form -->
+                <form id="register-form" style="display: none;">
+                    <div class="input-group">
+                        <label>Full Name</label>
+                        <input type="text" id="reg-name" required placeholder="John Doe">
+                    </div>
+                    <div class="input-group">
+                        <label>Email Address</label>
+                        <input type="email" id="reg-email" required placeholder="name@pos.com" autocomplete="username">
+                    </div>
+                    <div class="input-group">
+                        <label>Password</label>
+                        <input type="password" id="reg-password" required minlength="6" placeholder="••••••••" autocomplete="new-password">
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="btn-reg-submit">Create Account</button>
+                </form>
+            </div>
+            <div class="auth-design-orb orb-1"></div>
+            <div class="auth-design-orb orb-2"></div>
+        </div>
+    </section>
+
+    <!-- =============== MAIN DASHBOARD VIEW =============== -->
+    <section id="dashboard-view" class="view">
+        <div class="layout">
+            <!-- Sidebar -->
+            <aside class="sidebar glass-panel">
+                <div class="sidebar-brand">
+                    <h2>POS <span>PRO</span></h2>
+                </div>
+                
+                <div class="user-info">
+                    <div class="avatar" id="nav-avatar">A</div>
+                    <div class="details">
+                        <p class="name" id="nav-user-name">User Name</p>
+                        <span class="role" id="nav-user-role">Role</span>
+                    </div>
+                </div>
+
+                <nav class="sidebar-nav">
+                    <a href="#" class="nav-item active" onclick="navigate('products', this)">
+                        <!-- vector icon -->
+                        <span class="icon">📦</span>
+                        Products
+                    </a>
+                    <a href="#" class="nav-item" id="nav-users" onclick="navigate('users', this)" style="display: none;">
+                        <span class="icon">👥</span>
+                        Users & Roles
+                    </a>
+                </nav>
+
+                <div class="sidebar-footer">
+                    <button class="btn btn-outline-danger w-100" onclick="logout()">
+                        <span class="icon">🚪</span> Logout
+                    </button>
+                </div>
+            </aside>
+
+            <!-- Main Content Area -->
+            <main class="main-content">
+                <header class="top-nav glass-panel">
+                    <h1 id="page-title">Products Management</h1>
+                    <div class="actions">
+                        <select id="lang-selector" onchange="changeLanguage(this.value)" class="lang-select">
+                            <option value="en">English (EN)</option>
+                            <option value="ar">Arabic (AR)</option>
+                        </select>
+                    </div>
+                </header>
+
+                <div class="content-wrapper">
+                    <!-- Products Tab -->
+                    <div id="tab-products" class="tab-content active">
+                        <div class="header-actions">
+                            <button class="btn btn-primary" onclick="openProductModal()">+ Add New Product</button>
+                            <input type="text" class="search-input" placeholder="Search products..." id="product-search" oninput="filterProducts(this.value)">
+                        </div>
+                        
+                        <div class="table-container glass-panel mt-4">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Name</th>
+                                        <th>Price</th>
+                                        <th>Stock</th>
+                                        <th>Last Updated</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="products-table-body">
+                                    <tr><td colspan="6" class="text-center">Loading products...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Users Tab -->
+                    <div id="tab-users" class="tab-content">
+                        <div class="header-actions">
+                            <button class="btn btn-primary" onclick="openUserModal()">+ Add New User</button>
+                        </div>
+                        <div class="table-container glass-panel mt-4">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Status</th>
+                                        <th>Roles & Permissions</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="users-table-body">
+                                    <tr><td colspan="6" class="text-center">Loading users...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </section>
+
+    <!-- =============== MODALS =============== -->
+    <div id="overlay" class="overlay" onclick="closeAllModals()"></div>
+
+    <!-- Product Modal -->
+    <div id="product-modal" class="modal glass-panel">
+        <div class="modal-header">
+            <h2 id="product-modal-title">Add Product</h2>
+            <button class="close-btn" onclick="closeAllModals()">×</button>
+        </div>
+        <form id="product-form" onsubmit="handleProductSubmit(event)">
+            <input type="hidden" id="prod-id">
+            <div class="input-group">
+                <label>Product Name</label>
+                <input type="text" id="prod-name" required>
+            </div>
+            <div class="input-group">
+                <label>Description</label>
+                <textarea id="prod-desc" rows="3"></textarea>
+            </div>
+            <div class="row">
+                <div class="input-group flex-1">
+                    <label>Price</label>
+                    <input type="number" id="prod-price" step="0.01" min="0.01" required>
+                </div>
+                <div class="input-group flex-1">
+                    <label>Stock</label>
+                    <input type="number" id="prod-stock" min="0" required>
+                </div>
+            </div>
+            <div class="modal-footer mt-4">
+                <button type="button" class="btn btn-ghost" onclick="closeAllModals()">Cancel</button>
+                <button type="submit" class="btn btn-primary" id="btn-save-prod">Save Product</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- User Modal (Create) -->
+    <div id="user-modal" class="modal glass-panel">
+        <div class="modal-header">
+            <h2>Create New User</h2>
+            <button class="close-btn" onclick="closeAllModals()">×</button>
+        </div>
+        <form id="user-form" onsubmit="handleUserCreateSubmit(event)">
+            <div class="input-group">
+                <label>Full Name</label>
+                <input type="text" id="user-name" required placeholder="Full Name">
+            </div>
+            <div class="input-group">
+                <label>Email Address</label>
+                <input type="email" id="user-email" required placeholder="email@pos.com">
+            </div>
+            <div class="input-group">
+                <label>Password</label>
+                <input type="password" id="user-password" required minlength="6" placeholder="••••••••">
+            </div>
+            
+            <div class="row">
+                <div class="input-group flex-1">
+                    <label>Roles</label>
+                    <div id="user-creation-roles" class="checkbox-list glass-panel p-2">
+                        <!-- Dynamic Roles -->
+                    </div>
+                </div>
+                <div class="input-group flex-1">
+                    <label>Direct Permissions</label>
+                    <div id="user-creation-perms" class="checkbox-list glass-panel p-2">
+                        <!-- Dynamic Permissions -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer mt-4">
+                <button type="button" class="btn btn-ghost" onclick="closeAllModals()">Cancel</button>
+                <button type="submit" class="btn btn-primary" id="btn-save-user">Create User</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- User Access Modal (Edit Roles & Permissions) -->
+    <div id="user-access-modal" class="modal glass-panel">
+        <div class="modal-header">
+            <h2>Manage User Access</h2>
+            <button class="close-btn" onclick="closeAllModals()">×</button>
+        </div>
+        <form id="user-access-form" onsubmit="handleUserAccessSubmit(event)">
+            <input type="hidden" id="access-user-id">
+            <p class="mb-3 text-secondary">Update access for <strong id="access-user-name" class="text-white"></strong></p>
+            
+            <div class="row">
+                <div class="input-group flex-1">
+                    <label>Roles</label>
+                    <div id="access-roles-list" class="checkbox-list glass-panel p-2">
+                        <!-- Dynamic Roles -->
+                    </div>
+                </div>
+                <div class="input-group flex-1">
+                    <label>Direct Permissions</label>
+                    <div id="access-perms-list" class="checkbox-list glass-panel p-2">
+                        <!-- Dynamic Permissions -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer mt-4">
+                <button type="button" class="btn btn-ghost" onclick="closeAllModals()">Cancel</button>
+                <button type="submit" class="btn btn-primary" id="btn-save-access">Update Access</button>
+            </div>
+        </form>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
