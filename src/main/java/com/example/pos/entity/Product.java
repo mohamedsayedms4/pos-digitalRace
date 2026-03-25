@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "products")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
-public class Product {
+public class Product extends AuditableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,16 +28,10 @@ public class Product {
     @Builder.Default
     private Integer stock = 0;
 
-    @Column(nullable = false, updatable = false)
-    @Builder.Default
-    private LocalDateTime createdAt = LocalDateTime.now();
-    
-    @Column
-    private LocalDateTime updatedAt;
-
     @PreUpdate
     protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
+        // Redundant with auditing, but keeping for compatibility if needed. 
+        // Better to remove if using JpaAuditing exclusively.
     }
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -35,6 +35,7 @@ public class UserManagementService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final MessageSource messageSource;
+    private final AuditService auditService;
 
     /* -------- LIST -------- */
 
@@ -74,7 +75,9 @@ public class UserManagementService {
             user.setPermissions(mapPermissions(request.getPermissions(), locale));
         }
 
-        return userMapper.toDto(userRepository.save(user));
+        User saved = userRepository.save(user);
+        auditService.logAction("USER_CREATE", "USER", saved.getId(), "Created user: " + saved.getEmail());
+        return userMapper.toDto(saved);
     }
 
     /* -------- UPDATE ACCESS -------- */
@@ -101,6 +104,7 @@ public class UserManagementService {
         User user = findUserOrThrow(userId, locale);
         user.setRoles(mapRoles(request.getRoles(), locale));
         userRepository.save(user);
+        auditService.logAction("USER_ROLE_ASSIGN", "USER", user.getId(), "Assigned roles to user: " + user.getEmail());
         return userMapper.toDto(user);
     }
 
@@ -121,6 +125,7 @@ public class UserManagementService {
         User user = findUserOrThrow(userId, locale);
         user.setEnabled(enabled);
         userRepository.save(user);
+        auditService.logAction(enabled ? "USER_ENABLE" : "USER_DISABLE", "USER", user.getId(), (enabled ? "Enabled" : "Disabled") + " user: " + user.getEmail());
         return userMapper.toDto(user);
     }
 
@@ -129,6 +134,7 @@ public class UserManagementService {
     @Transactional
     public void deleteUser(Long userId, Locale locale) {
         User user = findUserOrThrow(userId, locale);
+        auditService.logAction("USER_DELETE", "USER", user.getId(), "Deleted user: " + user.getEmail());
         userRepository.delete(user);
     }
 

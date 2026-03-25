@@ -39,7 +39,8 @@ public class DataInitializer implements ApplicationRunner {
                 "USER_READ", "USER_WRITE", "USER_DELETE",
                 "ROLE_READ", "ROLE_WRITE", "ROLE_DELETE",
                 "PRODUCT_READ", "PRODUCT_WRITE", "PRODUCT_DELETE",
-                "CATEGORY_READ", "CATEGORY_WRITE", "CATEGORY_DELETE"
+                "CATEGORY_READ", "CATEGORY_WRITE", "CATEGORY_DELETE",
+                "AUDIT_READ"
         );
 
         Set<Permission> allPermissions = new HashSet<>();

@@ -9,7 +9,7 @@ import java.util.Set;
 @Entity
 @Table(name = "roles")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
-public class Role {
+public class Role extends AuditableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 @Entity
 @Table(name = "users")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
-public class User implements UserDetails {
+public class User extends AuditableEntity implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

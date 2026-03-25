@@ -22,6 +22,7 @@ public class CategoryService {
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
     private final MessageSource messageSource;
+    private final AuditService auditService;
 
     public List<CategoryDto> getAllCategories(boolean rootsOnly) {
         List<Category> categories = rootsOnly ? 
@@ -49,7 +50,9 @@ public class CategoryService {
             category.setParent(findCategoryOrThrow(request.getParentId(), locale));
         }
 
-        return categoryMapper.toDto(categoryRepository.save(category));
+        Category saved = categoryRepository.save(category);
+        auditService.logAction("CATEGORY_CREATE", "CATEGORY", saved.getId(), "Created category: " + saved.getName());
+        return categoryMapper.toDto(saved);
     }
 
     @Transactional
@@ -73,7 +76,9 @@ public class CategoryService {
             category.setParent(null);
         }
 
-        return categoryMapper.toDto(categoryRepository.save(category));
+        Category saved = categoryRepository.save(category);
+        auditService.logAction("CATEGORY_UPDATE", "CATEGORY", saved.getId(), "Updated category: " + saved.getName());
+        return categoryMapper.toDto(saved);
     }
 
     @Transactional
@@ -88,6 +93,7 @@ public class CategoryService {
             throw new RuntimeException(messageSource.getMessage("admin.category.has.products", null, locale));
         }
 
+        auditService.logAction("CATEGORY_DELETE", "CATEGORY", id, "Deleted category: " + category.getName());
         categoryRepository.delete(category);
     }
 

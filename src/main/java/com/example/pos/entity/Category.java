@@ -10,7 +10,7 @@ import java.util.List;
 @Entity
 @Table(name = "categories")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
-public class Category {
+public class Category extends AuditableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,15 +34,7 @@ public class Category {
     @Builder.Default
     private List<Product> products = new ArrayList<>();
 
-    @Column(nullable = false, updatable = false)
-    @Builder.Default
-    private LocalDateTime createdAt = LocalDateTime.now();
-
-    @Column
-    private LocalDateTime updatedAt;
-
     @PreUpdate
     protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
     }
 }

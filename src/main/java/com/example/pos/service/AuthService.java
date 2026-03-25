@@ -36,6 +36,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final UserMapper userMapper;
     private final MessageSource messageSource;
+    private final AuditService auditService;
 
     @Value("${jwt.refresh-token-expiration}")
     private long refreshTokenExpiration;
@@ -61,6 +62,7 @@ public class AuthService {
                 .build();
 
         userRepository.save(user);
+        auditService.logAction("REGISTER", "USER", user.getId(), "New user registered with email: " + user.getEmail());
         return buildAuthResponse(user);
     }
 
@@ -76,6 +78,7 @@ public class AuthService {
                 .orElseThrow(() -> new UnauthorizedException(
                         messageSource.getMessage("auth.invalid.credentials", null, locale)));
 
+        auditService.logAction("LOGIN_SUCCESS", "USER", user.getId(), "User logged in: " + user.getEmail());
         return buildAuthResponse(user);
     }
 

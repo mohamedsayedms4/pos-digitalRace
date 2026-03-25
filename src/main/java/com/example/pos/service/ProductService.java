@@ -26,6 +26,7 @@ public class ProductService {
     private final ProductMapper productMapper;
     private final CategoryRepository categoryRepository;
     private final MessageSource messageSource;
+    private final AuditService auditService;
 
     public List<ProductDto> getAllProducts() {
         return productRepository.findAll().stream()
@@ -50,6 +51,7 @@ public class ProductService {
         }
         
         productRepository.save(product);
+        auditService.logAction("PRODUCT_CREATE", "PRODUCT", product.getId(), "Created product: " + product.getName());
         return productMapper.toDto(product);
     }
 
@@ -69,12 +71,14 @@ public class ProductService {
         }
         
         productRepository.save(product);
+        auditService.logAction("PRODUCT_UPDATE", "PRODUCT", product.getId(), "Updated product: " + product.getName());
         return productMapper.toDto(product);
     }
 
     @Transactional
     public void deleteProduct(Long id, Locale locale) {
         Product product = findProductOrThrow(id, locale);
+        auditService.logAction("PRODUCT_DELETE", "PRODUCT", id, "Deleted product: " + product.getName());
         productRepository.delete(product);
     }
 
