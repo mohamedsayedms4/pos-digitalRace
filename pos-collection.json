@@ -997,6 +997,88 @@
       ]
     },
     {
+      "name": "Installment Management",
+      "item": [
+        {
+          "name": "Generate Installment Plan",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"purchaseInvoiceId\": 1,\n    \"numberOfMonths\": 3,\n    \"downPayment\": 100.00,\n    \"startDate\": \"2024-04-01\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/installments/generate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "installments",
+                "generate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Pay Installment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/installments/1/pay",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "installments",
+                "1",
+                "pay"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Installments for Invoice",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/installments/invoice/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "installments",
+                "invoice",
+                "1"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
       "name": "Notification Management",
       "item": [
         {
