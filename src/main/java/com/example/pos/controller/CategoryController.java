@@ -13,11 +13,16 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
+import java.util.List;
 import java.util.Locale;
 
 @RestController
 @RequestMapping("/api/v1/categories")
 @RequiredArgsConstructor
+@Tag(name = "Category Management", description = "Endpoints for managing product categories (Requires CATEGORY_* authorities)")
 public class CategoryController {
 
     private final CategoryService categoryService;
@@ -25,6 +30,7 @@ public class CategoryController {
 
     @GetMapping
     @PreAuthorize("hasAuthority('CATEGORY_READ')")
+    @Operation(summary = "Get all categories", description = "Retrieves a hierarchical or flat list of all categories.")
     public ResponseEntity<ApiResponse<List<CategoryDto>>> getAllCategories(
             @RequestParam(defaultValue = "false") boolean rootsOnly) {
         return ResponseEntity.ok(ApiResponse.<List<CategoryDto>>builder()
@@ -35,6 +41,7 @@ public class CategoryController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('CATEGORY_READ')")
+    @Operation(summary = "Get a single category", description = "Retrieves details of a specific category by ID.")
     public ResponseEntity<ApiResponse<CategoryDto>> getCategory(@PathVariable Long id, Locale locale) {
         return ResponseEntity.ok(ApiResponse.<CategoryDto>builder()
                 .success(true)
@@ -44,6 +51,7 @@ public class CategoryController {
 
     @PostMapping
     @PreAuthorize("hasAuthority('CATEGORY_WRITE')")
+    @Operation(summary = "Create a new category", description = "Creates a new category. Can optionally be a subcategory if parentId is provided.")
     public ResponseEntity<ApiResponse<CategoryDto>> createCategory(
             @Valid @RequestBody CategoryRequest request, Locale locale) {
         CategoryDto response = categoryService.createCategory(request, locale);
@@ -57,6 +65,7 @@ public class CategoryController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('CATEGORY_WRITE')")
+    @Operation(summary = "Update an existing category", description = "Updates details of an existing category by ID.")
     public ResponseEntity<ApiResponse<CategoryDto>> updateCategory(
             @PathVariable Long id,
             @Valid @RequestBody CategoryRequest request,
@@ -71,6 +80,7 @@ public class CategoryController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('CATEGORY_DELETE')")
+    @Operation(summary = "Delete a category", description = "Deletes a category by ID. Cannot delete a category that has children or associated products.")
     public ResponseEntity<ApiResponse<Void>> deleteCategory(@PathVariable Long id, Locale locale) {
         categoryService.deleteCategory(id, locale);
         return ResponseEntity.ok(ApiResponse.<Void>builder()

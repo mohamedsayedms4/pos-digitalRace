@@ -40,6 +40,8 @@ public class DataInitializer implements ApplicationRunner {
                 "ROLE_READ", "ROLE_WRITE", "ROLE_DELETE",
                 "PRODUCT_READ", "PRODUCT_WRITE", "PRODUCT_DELETE",
                 "CATEGORY_READ", "CATEGORY_WRITE", "CATEGORY_DELETE",
+                "SUPPLIER_READ", "SUPPLIER_WRITE", "SUPPLIER_DELETE",
+                "PURCHASE_READ", "PURCHASE_WRITE",
                 "AUDIT_READ"
         );
 

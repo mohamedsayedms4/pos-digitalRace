@@ -22,16 +22,25 @@ public class Product extends AuditableEntity {
     private String description;
 
     @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal price;
+    private BigDecimal purchasePrice;
+
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal salePrice;
+
+    @Column(unique = true, length = 50)
+    private String productCode; // For QR/Barcode
 
     @Column(nullable = false)
     @Builder.Default
     private Integer stock = 0;
 
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private java.util.List<ProductImage> images = new java.util.ArrayList<>();
+
     @PreUpdate
     protected void onUpdate() {
-        // Redundant with auditing, but keeping for compatibility if needed. 
-        // Better to remove if using JpaAuditing exclusively.
+        // Redundant with auditing, but keeping for compatibility if needed.
     }
 
     @ManyToOne(fetch = FetchType.LAZY)
